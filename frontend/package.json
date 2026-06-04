@@ -1,38 +1,25 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "ecoflow-frontend",
   "private": true,
-  "dependencies": {
-    "axios": "^1.12.2",
-    "fuse.js": "^7.1.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.23.1",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
-  },
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite --host 127.0.0.1 --port 3001",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "dependencies": {
+    "@tailwindcss/vite": "latest",
+    "leaflet": "latest",
+    "lucide-react": "latest",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-leaflet": "latest",
+    "react-router-dom": "latest",
+    "recharts": "latest",
+    "tailwindcss": "latest"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "vite": "latest"
   }
 }
