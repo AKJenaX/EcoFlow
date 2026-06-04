@@ -17,25 +17,8 @@ import {
   recentAlerts,
   dashboardStats
 } from "../data/mockData.js";
+import StatCard from "../widgets/StatCard.jsx";
 
-function StatCard({ icon: Icon, label, value, unit, bgColor }) {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-600">{label}</p>
-          <p className="mt-2 text-3xl font-semibold text-slate-900">
-            {value}
-            {unit && <span className="text-lg text-slate-500">{unit}</span>}
-          </p>
-        </div>
-        <div className={`${bgColor} rounded-lg p-3`}>
-          <Icon className="text-white" size={24} />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function AlertBadge({ status }) {
   const statusStyles = {

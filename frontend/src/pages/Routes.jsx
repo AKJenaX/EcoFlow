@@ -1,16 +1,8 @@
 import React, { useState } from "react";
 import { Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { routesData, routesSummary } from "../data/mockData";
+import StatCard from "../widgets/StatCard.jsx";
 
-const StatCard = ({ label, value, unit = "" }) => (
-  <div className="rounded-lg border border-slate-200 bg-white px-6 py-4 shadow-sm">
-    <p className="text-sm font-medium text-slate-600">{label}</p>
-    <p className="mt-1 text-2xl font-bold text-[#1a3a2a]">
-      {value}
-      {unit && <span className="text-lg text-slate-500">{unit}</span>}
-    </p>
-  </div>
-);
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {

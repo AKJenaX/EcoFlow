@@ -75,8 +75,7 @@ frontend/
 │   │   ├── Reports.jsx     # Analytics and export
 │   │   └── MapPage.jsx     # Smart bin coverage map
 │   ├── layouts/
-│   │   ├── MainLayout.jsx  # Responsive layout with sidebar
-│   │   └── AppLayout.jsx   # Alternative layout
+│   │   └── MainLayout.jsx  # Responsive layout with sidebar
 │   ├── widgets/            # Reusable components
 │   │   ├── StatCard.jsx
 │   │   ├── BinMap.jsx
@@ -88,7 +87,6 @@ frontend/
 │   │   └── operations.js   # Sample operations data
 │   ├── styles/
 │   │   └── styles.css      # Global styles with animations
-│   ├── App.jsx             # Root component
 │   └── main.jsx            # Entry point with routing
 ├── index.html
 ├── package.json
@@ -185,13 +183,13 @@ MIT License - See LICENSE file for details
 ## Screenshots
 
 ### Dashboard
-![Dashboard](https://via.placeholder.com/1200x600?text=Dashboard+Overview)
+![Dashboard](./docs/screenshots/dashboard.png)
 
 ### Bins Management
-![Bins Map](https://via.placeholder.com/1200x600?text=Interactive+Bins+Map)
+![Bins Map](./docs/screenshots/bins-map.png)
 
 ### Reports Analytics
-![Reports](https://via.placeholder.com/1200x600?text=Reports+Analytics)
+![Reports](./docs/screenshots/reports.png)
 
 ---
 
