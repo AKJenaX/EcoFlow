@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Bell, Menu, X } from "lucide-react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { Bell, Menu, X, LogOut } from "lucide-react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
   { label: "Dashboard", to: "/dashboard" },
@@ -8,12 +8,19 @@ const navItems = [
   { label: "Routes", to: "/routes" },
   { label: "Fleet", to: "/fleet" },
   { label: "Map", to: "/map" },
-  { label: "Reports", to: "/reports" }
+  { label: "Reports", to: "/reports" },
+  { label: "Authority", to: "/authority" }
 ];
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
@@ -29,7 +36,7 @@ export default function MainLayout() {
       <aside
         className={`fixed inset-y-0 left-0 z-20 w-64 bg-[#1a3a2a] px-5 py-6 text-white transition-transform duration-300 md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+        } flex flex-col`}
       >
         <div className="mb-10">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
@@ -38,7 +45,7 @@ export default function MainLayout() {
           <h1 className="mt-2 text-xl font-semibold">Operations</h1>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-2 flex-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -57,6 +64,14 @@ export default function MainLayout() {
             </NavLink>
           ))}
         </nav>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-emerald-50 hover:bg-white/10 transition-all duration-200"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
       </aside>
 
       <div className="min-h-screen md:pl-64">
