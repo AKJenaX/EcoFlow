@@ -100,6 +100,14 @@ function App() {
               </DashboardLayout>
             }
           />
+          <Route
+            path="/incidents"
+            element={
+              <DashboardLayout>
+                <IncidentCommandCenter />
+              </DashboardLayout>
+            }
+          />
 
           {/* ADVANCED ANALYTICS & MONITORING */}
           <Route
