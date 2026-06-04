@@ -1,18 +1,22 @@
-# EcoFlow - Smart Waste Management Dashboard
+# EcoFlow - Smart Waste Management System
 
-A modern, responsive dashboard for intelligent waste management and collection operations. Built with React, Vite, and real-time data visualization.
+A full-stack smart waste management platform with a React dashboard and Express REST API. Features real-time IoT telemetry, route optimisation, fleet tracking, incident management, and analytics — built for Bengaluru-scale municipal operations.
 
 ## Features
 
-- 📊 **Interactive Dashboards** - Real-time KPI cards and metrics tracking
-- 🗺️ **Smart Bin Mapping** - React Leaflet integration with color-coded bin status
-- 📈 **Advanced Analytics** - Monthly trends and waste category breakdowns with Recharts
-- 🚛 **Fleet Management** - Vehicle tracking and route optimization insights
+- 🔐 **Authentication** - JWT-based login with protected routes and role-based access control
+- 📊 **Interactive Dashboard** - Real-time KPI cards, charts, and live incident alerts from the API
+- 🗺️ **Smart Bin Mapping** - React Leaflet maps with color-coded bin markers and route polylines
+- 🚛 **Fleet Management** - Driver + vehicle data merged from the API with status tracking
+- 👮 **Authority Management** - Full CRUD for authority officers (add/edit/delete via API)
+- 📈 **Advanced Analytics** - Monthly trends, waste category breakdowns, and collection logs
+- 🛣️ **Route Management** - Collection routes with expandable bin-stop details
 - 📱 **Fully Responsive** - Mobile-first design with collapsible sidebar navigation
-- 🎨 **Modern UI** - Clean, accessible interface with smooth animations
-- 🌱 **Green Theme** - Sustainable design with nature-inspired color palette
+- 🔄 **Offline Fallback** - Graceful mock data fallback when the API is unavailable
 
 ## Tech Stack
+
+### Frontend
 
 [![React](https://img.shields.io/badge/React-19.0-61dafb?style=flat-square&logo=react)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-Latest-646cff?style=flat-square&logo=vite)](https://vitejs.dev)
@@ -20,23 +24,74 @@ A modern, responsive dashboard for intelligent waste management and collection o
 [![Recharts](https://img.shields.io/badge/Recharts-Latest-8884d8?style=flat-square)](https://recharts.org)
 [![Leaflet](https://img.shields.io/badge/Leaflet-Latest-1EB1AD?style=flat-square&logo=leaflet)](https://leafletjs.com)
 
-- **Frontend Framework**: React 19 with Hooks
-- **Build Tool**: Vite 5+
+- **Framework**: React 19 with Hooks
+- **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **Charting**: Recharts
 - **Mapping**: React Leaflet + Leaflet
 - **Icons**: Lucide React
 - **Routing**: React Router 7
 
+### Backend
+
+[![Express](https://img.shields.io/badge/Express-4.x-000000?style=flat-square&logo=express)](https://expressjs.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?style=flat-square&logo=mysql)](https://mysql.com)
+[![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens)](https://jwt.io)
+
+- **Runtime**: Node.js with Express
+- **Database**: MySQL
+- **Auth**: JWT (Bearer tokens) with bcrypt password hashing
+- **Security**: Helmet, CORS, rate limiting
+- **Architecture**: Role-based access control with audit logging
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/auth/login` | Authenticate → returns `{ accessToken }` |
+| `GET` | `/authority` | List all authority officers |
+| `POST` | `/authority/add` | Add new authority |
+| `PUT` | `/authority/update/:id` | Update authority |
+| `DELETE` | `/authority/delete/:id` | Delete authority |
+| `GET` | `/driver` | List all drivers |
+| `GET` | `/vehicle` | List all vehicles |
+| `GET` | `/bin` | List all bins |
+| `GET` | `/iot` | Live IoT telemetry (fill %, GPS, smoke, tilt) |
+| `GET` | `/incidents` | Incidents list |
+| `GET` | `/analytics` | Analytics data |
+| `GET` | `/anomalies` | Anomaly detection |
+| `GET` | `/complaints` | Complaints |
+
 ## Setup Instructions
 
 ### Prerequisites
 - Node.js 18+
 - npm 9+
+- MySQL 8+
 
-### Installation
+### Backend Setup
 
-1. **Clone and navigate to frontend directory**
+1. **Navigate to backend directory**
+   ```bash
+   cd backend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment** — copy `.env.example` to `.env` and fill in your MySQL credentials and JWT secret.
+
+4. **Start the server**
+   ```bash
+   node server.js
+   ```
+   The API will be available at `http://localhost:3000`
+
+### Frontend Setup
+
+1. **Navigate to frontend directory**
    ```bash
    cd frontend
    ```
@@ -46,139 +101,171 @@ A modern, responsive dashboard for intelligent waste management and collection o
    npm install
    ```
 
-3. **Start development server**
+3. **Configure environment** — copy `.env.example` to `.env`:
+   ```
+   VITE_API_URL=http://localhost:3000
+   ```
+
+4. **Start development server**
    ```bash
    npm run dev
    ```
-   The app will be available at `http://127.0.0.1:3002`
+   The app will be available at `http://127.0.0.1:3001`
 
-4. **Build for production**
+5. **Build for production**
    ```bash
    npm run build
    ```
 
-5. **Preview production build**
-   ```bash
-   npm run preview
-   ```
+### Default Login
+
+The login system uses the `UserTable` in the database. Credentials:
+- **User ID**: A valid `User_ID` from the database (e.g., `13`)
+- **Password**: The user's `Mobile_Number` (e.g., `9712245974`)
+
+> **Dev Mode**: Set `ALLOW_DEV_AUTH_BYPASS=true` in backend `.env` to bypass authentication on all protected API endpoints.
 
 ## Project Structure
 
 ```
-frontend/
-├── src/
-│   ├── pages/              # Page components
-│   │   ├── Dashboard.jsx   # KPI cards, charts, alerts
-│   │   ├── Bins.jsx        # Interactive map with sidebar list
-│   │   ├── Fleet.jsx       # Vehicle assignments table
-│   │   ├── Routes.jsx      # Route management
-│   │   ├── Reports.jsx     # Analytics and export
-│   │   └── MapPage.jsx     # Smart bin coverage map
-│   ├── layouts/
-│   │   └── MainLayout.jsx  # Responsive layout with sidebar
-│   ├── widgets/            # Reusable components
-│   │   ├── StatCard.jsx
-│   │   ├── BinMap.jsx
-│   │   ├── MetricCard.jsx
-│   │   ├── RouteChart.jsx
-│   │   └── Spinner.jsx     # Loading spinner
-│   ├── data/
-│   │   ├── mockData.js     # Mock data for development
-│   │   └── operations.js   # Sample operations data
-│   ├── styles/
-│   │   └── styles.css      # Global styles with animations
-│   └── main.jsx            # Entry point with routing
-├── index.html
-├── package.json
-├── vite.config.js
-└── tailwind.config.js
+ecoflow/
+├── backend/
+│   ├── routes/               # API route handlers
+│   │   ├── auth.js           # Login & token refresh
+│   │   ├── iot.js            # IoT telemetry
+│   │   ├── incidents.js      # Incident management
+│   │   ├── analytics.js      # Analytics queries
+│   │   ├── anomalies.js      # Anomaly detection
+│   │   ├── complaints.js     # Complaint tracking
+│   │   └── ...
+│   ├── middleware/
+│   │   ├── auth.js           # JWT verification, RBAC
+│   │   ├── audit.js          # Audit logging
+│   │   └── errorHandler.js   # Global error handler
+│   ├── services/
+│   │   └── rulesEngine.js    # Business rules engine
+│   ├── authority.js          # Authority CRUD
+│   ├── driver.js             # Driver CRUD
+│   ├── vehicle.js            # Vehicle CRUD
+│   ├── bin.js                # Bin CRUD
+│   ├── db.js                 # MySQL connection pool
+│   ├── server.js             # Express app entry point
+│   └── .env.example
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Login.jsx     # Authentication page
+│   │   │   ├── Dashboard.jsx # KPI cards, charts, live incidents
+│   │   │   ├── Bins.jsx      # Interactive bin map (API + mock fallback)
+│   │   │   ├── Fleet.jsx     # Drivers + vehicles merged view
+│   │   │   ├── Authority.jsx # Authority officers CRUD
+│   │   │   ├── Routes.jsx    # Collection route management
+│   │   │   ├── Reports.jsx   # Analytics and CSV export
+│   │   │   └── MapPage.jsx   # Full-page bin coverage map
+│   │   ├── services/
+│   │   │   └── api.js        # Centralised API client (fetch + Bearer auth)
+│   │   ├── layouts/
+│   │   │   └── MainLayout.jsx # Sidebar nav + header + logout
+│   │   ├── widgets/
+│   │   │   ├── StatCard.jsx  # Shared stat card component
+│   │   │   ├── Spinner.jsx   # Loading spinner
+│   │   │   ├── BinMap.jsx
+│   │   │   ├── MetricCard.jsx
+│   │   │   └── RouteChart.jsx
+│   │   ├── data/
+│   │   │   └── mockData.js   # Offline fallback data
+│   │   ├── styles.css        # Global styles with animations
+│   │   └── main.jsx          # Entry point with ProtectedRoute
+│   ├── .env.example
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+└── README.md
 ```
 
-## Key Features Details
+## Page Details
+
+### Login (`/login`)
+- User ID + password authentication via `POST /auth/login`
+- JWT token stored in localStorage
+- Auto-redirects to dashboard on success
+- Green-themed UI matching the app
 
 ### Dashboard (`/dashboard`)
 - 4 stat cards: Total Bins, Active Collections, Avg Fill Level, Alerts Today
 - Weekly waste collection line chart
-- Waste type breakdown pie chart
-- Recent alerts table with color-coded status badges
+- Waste type breakdown bar chart
+- **Live incidents table** fetched from `/incidents` API (falls back to mock data)
 
-### Bins Management (`/bins`)
-- Interactive map centered on Bengaluru
-- 10 color-coded bin markers (green/orange/red by fill level)
-- Filterable sidebar list with search functionality
-- Visual fill level progress bars
+### Bins (`/bins`)
+- Interactive Leaflet map centered on Bengaluru
+- **Live bin data** from `/bin` API with `Bin_ID`, `Assigned_Location`, `Capacity`, `GSM_Number`
+- Color-coded markers (green/orange/red by fill level)
+- Filterable sidebar list with search
 
-### Fleet Management (`/fleet`)
-- Vehicle assignments with driver and route information
-- Live status tracking
-- Load percentage display
+### Fleet (`/fleet`)
+- **Drivers + Vehicles merged** from `/driver` and `/vehicle` APIs
+- Maps: `Name`, `Address`, `Control_Number`, `Vehicle_Number`, `Vehicle_Type`, `Assigned_Location`
+- Status badges and load percentage progress bars
+
+### Authority (`/authority`)
+- **Full CRUD** — Add, Edit, Delete authority officers via the API
+- Table: Name, Designation, Control Room, Works Under
+- Inline form with validation
+
+### Routes (`/routes`)
+- 8 collection routes with zone coverage
+- Expandable detail panels showing bin stops per route
+- Progress bars and status badges (Completed / In Progress / Scheduled)
 
 ### Reports (`/reports`)
-- Date range selector for custom reporting
+- Date range selector
 - Monthly collection volume area chart
 - Waste category distribution pie chart
-- Collection logs table with export CSV functionality
+- Collection logs table with CSV export
+
+### Map (`/map`)
+- Full-page React Leaflet map with bin markers and route polylines
+- Legend: bin fill levels + route status colours
 
 ## Design System
 
 ### Color Palette
-- **Primary**: #1a3a2a (Dark Green - Sidebar)
-- **Accent**: #84cc16 (Lime Green - Highlights)
-- **Background**: #f1f5f9 (Slate 100)
-- **Text**: #0f172a (Slate 950)
+- **Primary**: `#1a3a2a` (Dark Green — Sidebar)
+- **Accent**: `#84cc16` (Lime Green — Buttons, highlights)
+- **Background**: `#f1f5f9` (Slate 100)
+- **Text**: `#0f172a` (Slate 950)
 
 ### Responsive Breakpoints
 - **Mobile**: < 768px (Hamburger menu, single column)
-- **Tablet**: 768px - 1024px (Sidebar visible, adjusted padding)
+- **Tablet**: 768px – 1024px (Sidebar visible, adjusted grid)
 - **Desktop**: > 1024px (Full layout)
 
-### Animation
-- Page fade-in: 300ms ease-in-out
-- Sidebar transition: 300ms transform
-- Smooth interactive states: 200ms
+## Architecture
 
-## Component Highlights
-
-### Interactive Maps
-- React Leaflet with OpenStreetMap tiles
-- Real-time marker updates
-- Popup information displays
-
-### Data Visualization
-- Recharts line, area, and pie charts
-- Interactive tooltips
-- Responsive container sizing
-
-### Responsive UI
-- Mobile-first design approach
-- Collapsible sidebar on small screens
-- Touch-friendly interactive elements
-
-## Performance Features
-- Code splitting with React Router
-- Lazy loading for page components
-- Optimized re-renders with useCallback/useMemo
-- Lightweight animations with CSS transitions
+```
+┌─────────────┐     fetch + Bearer token     ┌──────────────┐
+│   React UI  │ ──────────────────────────▶  │  Express API │
+│  (Vite dev) │ ◀──────────────────────────  │  port 3000   │
+│  port 3001  │        JSON responses        │              │
+└─────────────┘                              │  MySQL DB    │
+      │                                      │  JWT Auth    │
+      ▼                                      │  RBAC + Audit│
+ Mock fallback                               └──────────────┘
+ (mockData.js)
+```
 
 ## Contributing
 
 1. Create a feature branch
 2. Make your changes
 3. Test responsiveness across breakpoints
-4. Submit a pull request
-
-## Future Enhancements
-
-- Real-time WebSocket updates
-- Advanced filtering and search
-- User authentication and roles
-- PDF report generation
-- Mobile app version
-- Dark mode toggle
+4. Run `npm run build` in frontend to verify
+5. Submit a pull request
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT License — See LICENSE file for details
 
 ## Screenshots
 
