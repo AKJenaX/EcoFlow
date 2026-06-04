@@ -1,10 +1,13 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, MapPinned, Recycle, Truck } from "lucide-react";
+import { LayoutDashboard, MapPinned, Recycle, Truck, Route, Trash2, FileBarChart } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", to: "/", icon: LayoutDashboard },
   { label: "Live Map", to: "/map", icon: MapPinned },
-  { label: "Fleet", to: "/fleet", icon: Truck }
+  { label: "Routes", to: "/routes", icon: Route },
+  { label: "Fleet", to: "/fleet", icon: Truck },
+  { label: "Bins", to: "/bins", icon: Trash2 },
+  { label: "Reports", to: "/reports", icon: FileBarChart }
 ];
 
 export default function AppLayout() {
