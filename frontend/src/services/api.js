@@ -57,3 +57,17 @@ export const register = (username, password) =>
     method: "POST",
     body: JSON.stringify({ username, password }),
   });
+
+// ── Pickup Requests ──────────────────────────────────────────────────────────
+export const getPickupRequests = (status) =>
+  request(`/api/pickup-requests${status ? `?status=${status}` : ""}`);
+
+export const createPickupRequest = (data) =>
+  request("/api/pickup-requests", { method: "POST", body: JSON.stringify(data) });
+
+export const updatePickupRequest = (id, data) =>
+  request(`/api/pickup-requests/${id}`, { method: "PUT", body: JSON.stringify(data) });
+
+export const deletePickupRequest = (id) =>
+  request(`/api/pickup-requests/${id}`, { method: "DELETE" });
+

@@ -2,9 +2,9 @@ import "leaflet/dist/leaflet.css";
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
-import { Search } from "lucide-react";
+import { Search, CalendarPlus, X } from "lucide-react";
 import { binMarkers as mockBins } from "../data/mockData.js";
-import { getBins } from "../services/api.js";
+import { getBins, createPickupRequest } from "../services/api.js";
 import Spinner from "../widgets/Spinner.jsx";
 
 const createMarkerIcon = (fillPercentage) => {
@@ -51,11 +51,122 @@ function mapApiBin(apiBin) {
   };
 }
 
+// ── Schedule Pickup Modal ─────────────────────────────────────────────────────
+function SchedulePickupModal({ bin, onClose, onSuccess }) {
+  const [date, setDate] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!date) { setError("Please select a scheduled date."); return; }
+    setSubmitting(true);
+    setError("");
+    try {
+      await createPickupRequest({ binId: bin.id, scheduledDate: date, notes });
+      onSuccess();
+    } catch (err) {
+      setError("Failed to schedule pickup. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="relative w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+        >
+          <X size={18} />
+        </button>
+
+        <div className="mb-5">
+          <h2 className="text-lg font-semibold text-[#1a3a2a]">Schedule Pickup</h2>
+          <p className="mt-1 text-sm text-slate-500">Bin {bin.id} — {bin.area}</p>
+        </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="pickup-bin-id" className="block text-sm font-medium text-slate-700 mb-1">
+              Bin ID
+            </label>
+            <input
+              id="pickup-bin-id"
+              type="text"
+              value={bin.id}
+              readOnly
+              className="w-full rounded-lg border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-600"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="pickup-date" className="block text-sm font-medium text-slate-700 mb-1">
+              Scheduled Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="pickup-date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+              required
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="pickup-notes" className="block text-sm font-medium text-slate-700 mb-1">
+              Notes
+            </label>
+            <textarea
+              id="pickup-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              placeholder="Optional — describe any special instructions"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 resize-none"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 rounded-lg bg-[#84cc16] px-4 py-2.5 text-sm font-semibold text-[#1a3a2a] shadow-md hover:bg-[#65a30d] disabled:opacity-50"
+            >
+              {submitting ? "Scheduling…" : "Schedule Pickup"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Bins Page ────────────────────────────────────────────────────────────
 export default function Bins() {
   const [searchQuery, setSearchQuery] = useState("");
   const [bins, setBins] = useState(mockBins);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedBin, setSelectedBin] = useState(null);
+  const [toastMsg, setToastMsg] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -80,6 +191,12 @@ export default function Bins() {
     bin.area.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleScheduleSuccess = () => {
+    setSelectedBin(null);
+    setToastMsg("Pickup scheduled successfully!");
+    setTimeout(() => setToastMsg(""), 3500);
+  };
+
   return (
     <div className="space-y-6">
       <header>
@@ -89,6 +206,12 @@ export default function Bins() {
 
       {error && (
         <div className="rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-700">{error}</div>
+      )}
+
+      {toastMsg && (
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700 font-medium">
+          ✓ {toastMsg}
+        </div>
       )}
 
       {loading ? (
@@ -110,6 +233,12 @@ export default function Bins() {
                         {bin.gsm !== "-" && <p className="text-slate-600"><strong>GSM:</strong> {bin.gsm}</p>}
                         <p className="text-slate-600"><strong>Last Collected:</strong> {bin.lastCollected}</p>
                       </div>
+                      <button
+                        onClick={() => setSelectedBin(bin)}
+                        className="mt-1 w-full rounded bg-[#84cc16] px-3 py-1.5 text-xs font-semibold text-[#1a3a2a] hover:bg-[#65a30d]"
+                      >
+                        Schedule Pickup
+                      </button>
                     </div>
                   </Popup>
                 </Marker>
@@ -135,6 +264,13 @@ export default function Bins() {
                         <p className="font-semibold text-slate-900">{bin.id}</p>
                         <p className="text-xs text-slate-600">{bin.area}</p>
                       </div>
+                      <button
+                        onClick={() => setSelectedBin(bin)}
+                        title="Schedule Pickup"
+                        className="ml-2 rounded-full p-1 text-slate-400 hover:bg-white hover:text-emerald-700"
+                      >
+                        <CalendarPlus size={16} />
+                      </button>
                     </div>
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center justify-between text-xs">
@@ -160,6 +296,14 @@ export default function Bins() {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedBin && (
+        <SchedulePickupModal
+          bin={selectedBin}
+          onClose={() => setSelectedBin(null)}
+          onSuccess={handleScheduleSuccess}
+        />
       )}
     </div>
   );

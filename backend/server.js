@@ -1,3 +1,4 @@
+import http from 'http';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -6,6 +7,7 @@ import { connectDB } from './db.js';
 import { requestContext } from './middleware/requestContext.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { registerRulesEngine } from './services/rulesEngine.js';
+import { attachWebSocketServer } from './services/wsServer.js';
 
 import authorityRoutes from './authority.js';
 import vehicleRoutes from './vehicle.js';
@@ -24,6 +26,8 @@ import forecastRoutes from './routes/forecast.js';
 import anomalyRoutes from './routes/anomalies.js';
 import complaintsRoutes from './routes/complaints.js';
 import copilotRoutes from './routes/copilot.js';
+import routeOptimizerRoutes from './routes/routes.js';
+import pickupRequestRoutes from './routes/pickupRequests.js';
 
 const app = express();
 app.use(helmet());
@@ -58,9 +62,11 @@ app.use('/forecast', forecastRoutes);
 app.use('/anomalies', anomalyRoutes);
 app.use('/complaints', complaintsRoutes);
 app.use('/copilot', copilotRoutes);
+app.use('/api/routes', routeOptimizerRoutes);
+app.use('/api/pickup-requests', pickupRequestRoutes);
 
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'swms-backend' });
+  res.json({ status: 'ok', service: 'ecoflow-backend' });
 });
 
 app.get('/ready', (_req, res) => {
@@ -74,5 +80,8 @@ const PORT = Number(process.env.PORT || 3000);
 
 connectDB().then(() => {
   registerRulesEngine();
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  // Use http.createServer so we can attach the WebSocket server to the same port
+  const httpServer = http.createServer(app);
+  attachWebSocketServer(httpServer);
+  httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 });

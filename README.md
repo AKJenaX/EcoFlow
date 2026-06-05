@@ -255,6 +255,27 @@ ecoflow/
  (mockData.js)
 ```
 
+## Docker
+
+Run the full stack (backend, frontend, MySQL) with three commands:
+
+```bash
+git clone https://github.com/AKJenaX/EcoFlow.git
+cd EcoFlow
+cp .env.example .env   # fill in your values
+docker-compose up --build
+```
+
+- **Frontend** → http://localhost (port 80)
+- **Backend API** → http://localhost:3000
+- **MySQL** → port 3306 (internal, not exposed by default)
+
+> MySQL data is persisted in a named Docker volume (`mysql_data`). Run migrations inside the container with:
+> ```bash
+> docker-compose exec backend npm run migrate
+> docker-compose exec backend npm run seed:rbac
+> ```
+
 ## Contributing
 
 1. Create a feature branch

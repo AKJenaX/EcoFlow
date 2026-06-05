@@ -25,11 +25,32 @@ export default function Reports() {
   const [startDate, setStartDate] = useState("2024-05-01");
   const [endDate, setEndDate] = useState("2024-06-04");
 
-  const handleExportCSV = () => {
-    console.log("Export CSV clicked");
-    console.log("Date range:", { startDate, endDate });
-    console.log("Collection logs data:", collectionLogs);
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+  const triggerDownload = async (endpoint, filename) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch(`${BASE_URL}${endpoint}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Export failed: " + err.message);
+    }
   };
+
+  const handleExportCSV = () =>
+    triggerDownload(`/analytics/export/csv?range=all`, `ecoflow-analytics.csv`);
+
+  const handleExportPDF = () =>
+    triggerDownload(`/analytics/export/pdf?range=all`, `ecoflow-analytics.pdf`);
 
   const getStatusColor = (status) => {
     if (status === "Completed") return "text-emerald-700 font-semibold";
@@ -176,13 +197,24 @@ export default function Reports() {
               Detailed collection records
             </p>
           </div>
-          <button
-            onClick={handleExportCSV}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-          >
-            <Download size={18} />
-            Export CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportCSV}
+              id="export-csv-btn"
+              className="inline-flex items-center gap-2 rounded-lg border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <Download size={16} />
+              Export CSV
+            </button>
+            <button
+              onClick={handleExportPDF}
+              id="export-pdf-btn"
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <Download size={16} />
+              Export PDF
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">

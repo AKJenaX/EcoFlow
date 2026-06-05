@@ -2,6 +2,7 @@ import express from 'express';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { requireAuth, requirePermission } from '../middleware/auth.js';
 import { executeQuery } from '../db.js';
+import { generateCSV, generatePDF } from '../services/exportService.js';
 
 const router = express.Router();
 
@@ -195,6 +196,76 @@ router.post(
         fleet_utilization_pct ?? null,
         missed_pickup_recurrence_pct ?? null
       ]
+  requireAuth,
+  requirePermission('analytics.read'),
+  asyncHandler(async (_req, res) => {
+    const [[incidentStats]] = await executeQuery(
+      `SELECT
+        COUNT(*) AS total_incidents,
+        SUM(CASE WHEN severity = 'critical' THEN 1 ELSE 0 END) AS critical_incidents,
+        SUM(CASE WHEN status IN ('resolved','closed') THEN 1 ELSE 0 END) AS resolved_incidents
+      FROM incidents`
+    );
+
+    const [[telemetryStats]] = await executeQuery(
+      `SELECT
+        COUNT(*) AS telemetry_events,
+        AVG(fill_pct) AS avg_fill_pct
+      FROM telemetry_events`
+    );
+
+    res.json({ incidentStats, telemetryStats });
+  })
+);
+
+router.get(
+  '/zone-scorecard',
+  requireAuth,
+  requirePermission('analytics.read'),
+  asyncHandler(async (_req, res) => {
+    const [rows] = await executeQuery(
+      `SELECT zone_name,
+              AVG(sla_adherence_pct) AS avg_sla_adherence_pct,
+              AVG(fleet_utilization_pct) AS avg_fleet_utilization_pct,
+              AVG(missed_pickup_recurrence_pct) AS avg_missed_pickup_recurrence_pct
+       FROM kpi_snapshots
+       GROUP BY zone_name`
+    );
+    res.json(rows);
+  })
+);
+
+router.post(
+  '/kpi/snapshot',
+  requireAuth,
+  requirePermission('analytics.write'),
+  asyncHandler(async (req, res) => {
+    const {
+      period_date,
+      zone_name,
+      overflow_reduction_pct,
+      sla_adherence_pct,
+      fuel_cost_per_ton,
+      avg_complaint_response_minutes,
+      fleet_utilization_pct,
+      missed_pickup_recurrence_pct
+    } = req.body || {};
+
+    const [result] = await executeQuery(
+      `INSERT INTO kpi_snapshots
+      (period_date, zone_name, overflow_reduction_pct, sla_adherence_pct, fuel_cost_per_ton,
+       avg_complaint_response_minutes, fleet_utilization_pct, missed_pickup_recurrence_pct)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        period_date,
+        zone_name || null,
+        overflow_reduction_pct ?? null,
+        sla_adherence_pct ?? null,
+        fuel_cost_per_ton ?? null,
+        avg_complaint_response_minutes ?? null,
+        fleet_utilization_pct ?? null,
+        missed_pickup_recurrence_pct ?? null
+      ]
     );
     res.json({ message: 'KPI snapshot created', id: result.insertId });
   })
@@ -207,6 +278,63 @@ router.get(
   asyncHandler(async (_req, res) => {
     const [rows] = await executeQuery('SELECT * FROM kpi_snapshots ORDER BY period_date DESC');
     res.json(rows);
+  })
+);
+
+// ── Export helpers ──────────────────────────────────────────────────────────
+
+function buildDateFilter(range) {
+  if (range === '7d') return `AND period_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)`;
+  if (range === '30d') return `AND period_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`;
+  return ''; // 'all' or missing → no filter
+}
+
+const EXPORT_COLUMNS = [
+  'period_date', 'zone_name', 'overflow_reduction_pct',
+  'sla_adherence_pct', 'fuel_cost_per_ton',
+  'avg_complaint_response_minutes', 'fleet_utilization_pct',
+  'missed_pickup_recurrence_pct'
+];
+
+/**
+ * GET /analytics/export/csv?range=7d|30d|all
+ */
+router.get(
+  '/export/csv',
+  requireAuth,
+  requirePermission('analytics.read'),
+  asyncHandler(async (req, res) => {
+    const range = req.query.range || 'all';
+    const [rows] = await executeQuery(
+      `SELECT ${EXPORT_COLUMNS.join(', ')} FROM kpi_snapshots WHERE 1=1 ${buildDateFilter(range)} ORDER BY period_date DESC`
+    );
+    const csv = generateCSV(rows, EXPORT_COLUMNS);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="ecoflow-analytics-${range}-${Date.now()}.csv"`);
+    res.send(csv);
+  })
+);
+
+/**
+ * GET /analytics/export/pdf?range=7d|30d|all
+ */
+router.get(
+  '/export/pdf',
+  requireAuth,
+  requirePermission('analytics.read'),
+  asyncHandler(async (req, res) => {
+    const range = req.query.range || 'all';
+    const [rows] = await executeQuery(
+      `SELECT ${EXPORT_COLUMNS.join(', ')} FROM kpi_snapshots WHERE 1=1 ${buildDateFilter(range)} ORDER BY period_date DESC`
+    );
+    const pdfBuf = await generatePDF(
+      `EcoFlow Analytics Report (${range})`,
+      rows,
+      EXPORT_COLUMNS
+    );
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="ecoflow-analytics-${range}-${Date.now()}.pdf"`);
+    res.send(pdfBuf);
   })
 );
 

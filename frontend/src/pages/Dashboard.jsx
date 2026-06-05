@@ -3,12 +3,13 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from "recharts";
-import { AlertCircle, TrendingUp, Zap, Trash2 } from "lucide-react";
+import { AlertCircle, TrendingUp, Zap, Trash2, Radio } from "lucide-react";
 import {
   weeklyCollectionData, wasteTypeData,
   recentAlerts as mockAlerts, dashboardStats
 } from "../data/mockData.js";
-import { getIncidents } from "../services/api.js";
+import { getIncidents, getPickupRequests, updatePickupRequest } from "../services/api.js";
+import { onMessage } from "../services/socket.js";
 import StatCard from "../widgets/StatCard.jsx";
 import Spinner from "../widgets/Spinner.jsx";
 
@@ -42,7 +43,12 @@ export default function Dashboard() {
   const [alerts, setAlerts] = useState(mockAlerts);
   const [alertsLoading, setAlertsLoading] = useState(true);
   const [alertsError, setAlertsError] = useState("");
+  const [wsConnected, setWsConnected] = useState(false);
+  const [pickupRequests, setPickupRequests] = useState([]);
+  const [pickupLoading, setPickupLoading] = useState(true);
+  const [confirmingId, setConfirmingId] = useState(null);
 
+  // Initial HTTP fetch on mount
   useEffect(() => {
     let cancelled = false;
     async function fetchIncidents() {
@@ -61,6 +67,55 @@ export default function Dashboard() {
     fetchIncidents();
     return () => { cancelled = true; };
   }, []);
+
+  // WebSocket live updates — replace or prepend updated alerts
+  useEffect(() => {
+    const unsubscribe = onMessage((msg) => {
+      if (msg.type === "ALERT_UPDATE" || msg.type === "BIN_UPDATE") {
+        setWsConnected(true);
+        const updated = mapIncident(msg.data);
+        setAlerts((prev) => {
+          const idx = prev.findIndex((a) => a.id === updated.id);
+          if (idx !== -1) {
+            const next = [...prev];
+            next[idx] = updated;
+            return next;
+          }
+          return [updated, ...prev].slice(0, 50);
+        });
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  // Fetch pending pickup requests
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchPickups() {
+      try {
+        const data = await getPickupRequests("pending");
+        if (!cancelled) setPickupRequests(Array.isArray(data) ? data : []);
+      } catch {
+        // silently ignore — feature may not have migration run yet
+      } finally {
+        if (!cancelled) setPickupLoading(false);
+      }
+    }
+    fetchPickups();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleConfirmPickup = async (id) => {
+    setConfirmingId(id);
+    try {
+      await updatePickupRequest(id, { status: "confirmed" });
+      setPickupRequests((prev) => prev.filter((r) => r.Request_ID !== id));
+    } catch {
+      alert("Failed to confirm pickup request.");
+    } finally {
+      setConfirmingId(null);
+    }
+  };
 
   const fillPercentageColor = (fill) => {
     if (fill >= 80) return "text-red-600 font-semibold";
@@ -119,7 +174,14 @@ export default function Dashboard() {
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Recent Alerts</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold text-slate-900">Recent Alerts</h2>
+          {wsConnected && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+              <Radio size={11} className="animate-pulse" /> Live
+            </span>
+          )}
+        </div>
         <p className="mt-1 text-sm text-slate-600">Latest bin status updates across the network</p>
         {alertsError && (
           <div className="mt-3 rounded-lg bg-yellow-50 border border-yellow-200 px-4 py-2 text-xs text-yellow-700">{alertsError}</div>
@@ -153,6 +215,51 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      {/* Pickup Requests Panel */}
+      {(!pickupLoading && pickupRequests.length > 0) && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-amber-900">Pending Pickup Requests</h2>
+              <p className="mt-0.5 text-sm text-amber-700">{pickupRequests.length} request{pickupRequests.length !== 1 ? "s" : ""} awaiting confirmation</p>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-amber-200">
+                  <th className="px-4 py-2 font-semibold text-amber-800">Bin ID</th>
+                  <th className="px-4 py-2 font-semibold text-amber-800">Location</th>
+                  <th className="px-4 py-2 font-semibold text-amber-800">Requested By</th>
+                  <th className="px-4 py-2 font-semibold text-amber-800">Date</th>
+                  <th className="px-4 py-2 font-semibold text-amber-800">Notes</th>
+                  <th className="px-4 py-2"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {pickupRequests.map((req) => (
+                  <tr key={req.Request_ID} className="border-b border-amber-100 hover:bg-amber-100/50">
+                    <td className="px-4 py-3 font-semibold text-slate-900">{req.Bin_ID}</td>
+                    <td className="px-4 py-3 text-slate-700">{req.bin_location || "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{req.Requested_By}</td>
+                    <td className="px-4 py-3 text-slate-700">{req.Scheduled_Date?.split("T")[0] || req.Scheduled_Date}</td>
+                    <td className="px-4 py-3 text-slate-500 max-w-xs truncate">{req.Notes || "-"}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleConfirmPickup(req.Request_ID)}
+                        disabled={confirmingId === req.Request_ID}
+                        className="rounded-lg bg-[#1a3a2a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2d5a40] disabled:opacity-50"
+                      >
+                        {confirmingId === req.Request_ID ? "Confirming…" : "Confirm"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
