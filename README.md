@@ -48,7 +48,8 @@ A full-stack smart waste management platform with a React dashboard and Express 
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/auth/login` | Authenticate → returns `{ accessToken }` |
+| `POST` | `/auth/login` | Authenticate with username + password → returns `{ accessToken }` |
+| `POST` | `/auth/register` | Register a new user → returns `{ message, userId }` |
 | `GET` | `/authority` | List all authority officers |
 | `POST` | `/authority/add` | Add new authority |
 | `PUT` | `/authority/update/:id` | Update authority |
@@ -119,11 +120,9 @@ A full-stack smart waste management platform with a React dashboard and Express 
 
 ### Default Login
 
-The login system uses the `UserTable` in the database. Credentials:
-- **User ID**: A valid `User_ID` from the database (e.g., `13`)
-- **Password**: The user's `Mobile_Number` (e.g., `9712245974`)
+Use the `/register` page to create an account, then log in with your **username** and **password**.
 
-> **Dev Mode**: Set `ALLOW_DEV_AUTH_BYPASS=true` in backend `.env` to bypass authentication on all protected API endpoints.
+> **Dev Mode**: Set `ALLOW_DEV_AUTH_BYPASS=true` in backend `.env` and log in with any username + password `devpass` to skip the database auth check during development.
 
 ## Project Structure
 
@@ -185,8 +184,9 @@ ecoflow/
 
 ## Page Details
 
-### Login (`/login`)
-- User ID + password authentication via `POST /auth/login`
+### Login (`/login`) & Register (`/register`)
+- Username + password authentication via `POST /auth/login`
+- New user registration via `POST /auth/register` with bcrypt-hashed passwords
 - JWT token stored in localStorage
 - Auto-redirects to dashboard on success
 - Green-themed UI matching the app
@@ -269,14 +269,11 @@ MIT License — See LICENSE file for details
 
 ## Screenshots
 
-### Dashboard
-![Dashboard](./docs/screenshots/dashboard.png)
+<!-- Screenshot coming soon: Dashboard overview showing KPI cards, weekly collection chart, waste type breakdown, and live incidents table -->
 
-### Bins Management
-![Bins Map](./docs/screenshots/bins-map.png)
+<!-- Screenshot coming soon: Bins map page showing interactive Leaflet map with color-coded bin markers across Bengaluru and filterable sidebar -->
 
-### Reports Analytics
-![Reports](./docs/screenshots/reports.png)
+<!-- Screenshot coming soon: Reports page showing monthly collection analytics, waste category pie chart, and CSV export table -->
 
 ---
 

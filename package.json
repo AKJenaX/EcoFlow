@@ -1,4 +1,18 @@
 {
+  "description": "Full-stack smart waste management platform with IoT telemetry, route optimization, fleet tracking, and anomaly detection — built for municipal operations",
+  "keywords": [
+    "smart-waste",
+    "iot",
+    "nodejs",
+    "react",
+    "mysql",
+    "smart-city",
+    "waste-management",
+    "dashboard",
+    "route-optimization"
+  ],
+  "author": "AKJenaX",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^17.2.3",
     "openai": "^6.3.0"
