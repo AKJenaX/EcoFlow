@@ -46,8 +46,14 @@ export const getIncidents = () => request("/incidents");
 export const getAnomalies = () => request("/anomalies");
 export const getComplaints = () => request("/complaints");
 
-export const login = (userId, password) =>
+export const login = (username, password) =>
   request("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ userId, password }),
+    body: JSON.stringify({ username, password }),
+  });
+
+export const register = (username, password) =>
+  request("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
   });

@@ -10,6 +10,7 @@ import Fleet from "./pages/Fleet.jsx";
 import MapPage from "./pages/MapPage.jsx";
 import Login from "./pages/Login.jsx";
 import Authority from "./pages/Authority.jsx";
+import Register from "./pages/Register.jsx";
 
 function ProtectedRoute() {
   const token = localStorage.getItem("accessToken");
@@ -19,6 +20,7 @@ function ProtectedRoute() {
 
 const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
+  { path: "/register", element: <Register /> },
   {
     path: "/",
     element: <ProtectedRoute />,

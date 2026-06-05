@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../services/api.js";
+import { register } from "../services/api.js";
 
-export default function Login() {
+export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -12,13 +13,27 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const data = await login(username, password);
-      localStorage.setItem("accessToken", data.accessToken);
-      navigate("/dashboard");
+      await register(username, password);
+      navigate("/login");
     } catch (err) {
-      setError("Invalid credentials. Please try again.");
+      if (err.status === 409) {
+        setError("Username is already taken. Please choose another.");
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -34,7 +49,7 @@ export default function Login() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-[#1a3a2a]">EcoFlow</h1>
-          <p className="mt-2 text-sm text-slate-600">Sign in to your operations dashboard</p>
+          <p className="mt-2 text-sm text-slate-600">Create your operations account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm space-y-5">
@@ -45,32 +60,47 @@ export default function Login() {
           )}
 
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label htmlFor="reg-username" className="block text-sm font-medium text-slate-700 mb-1.5">
               Username
             </label>
             <input
-              id="username"
+              id="reg-username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition"
-              placeholder="Enter your username"
+              placeholder="Choose a username"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label htmlFor="reg-password" className="block text-sm font-medium text-slate-700 mb-1.5">
               Password
             </label>
             <input
-              id="password"
+              id="reg-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition"
-              placeholder="Enter your password"
+              placeholder="At least 6 characters"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="reg-confirm-password" className="block text-sm font-medium text-slate-700 mb-1.5">
+              Confirm Password
+            </label>
+            <input
+              id="reg-confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 transition"
+              placeholder="Re-enter your password"
             />
           </div>
 
@@ -79,16 +109,16 @@ export default function Login() {
             disabled={loading}
             className="w-full rounded-lg bg-[#84cc16] px-4 py-2.5 text-sm font-semibold text-[#1a3a2a] shadow-md transition-all hover:shadow-lg hover:bg-[#65a30d] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Creating account..." : "Create Account"}
           </button>
 
           <p className="text-center text-sm text-slate-500">
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-              to="/register"
+              to="/login"
               className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
             >
-              Create account
+              Sign in
             </Link>
           </p>
         </form>
