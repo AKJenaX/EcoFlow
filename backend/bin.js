@@ -3,6 +3,7 @@ import { db } from './db.js';
 import { asyncHandler } from './middleware/asyncHandler.js';
 import { requireAuth, requirePermission } from './middleware/auth.js';
 import { auditAction } from './middleware/audit.js';
+import { predictFillLevel } from './services/fillPredictor.js';
 const router = express.Router();
 
 router.get('/', asyncHandler(async (req, res) => {
@@ -33,6 +34,15 @@ router.delete('/delete/:id', requireAuth, requirePermission('bin.delete'), audit
   const { id } = req.params;
   await db.execute('DELETE FROM Bin WHERE Bin_ID=?', [id]);
   res.json({ message: 'Bin deleted' });
+}));
+
+/**
+ * GET /bin/:id/prediction
+ * Returns fill-level prediction using linear regression on telemetry history.
+ */
+router.get('/:id/prediction', requireAuth, asyncHandler(async (req, res) => {
+  const result = await predictFillLevel(req.params.id);
+  res.json(result);
 }));
 
 export default router;

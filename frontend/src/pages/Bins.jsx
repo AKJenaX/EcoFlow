@@ -2,10 +2,53 @@ import "leaflet/dist/leaflet.css";
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
-import { Search, CalendarPlus, X } from "lucide-react";
+import { Search, CalendarPlus, X, TrendingUp } from "lucide-react";
 import { binMarkers as mockBins } from "../data/mockData.js";
-import { getBins, createPickupRequest } from "../services/api.js";
+import { getBins, createPickupRequest, getBinPrediction } from "../services/api.js";
 import Spinner from "../widgets/Spinner.jsx";
+
+// ── Fill Prediction Panel ─────────────────────────────────────────────────────
+function PredictionPanel({ binId }) {
+  const [pred, setPred] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setPred(null);
+    getBinPrediction(binId)
+      .then((data) => { if (!cancelled) setPred(data); })
+      .catch(() => { if (!cancelled) setPred({ error: 'unavailable' }); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [binId]);
+
+  const confidenceColors = {
+    high: "bg-emerald-100 text-emerald-700",
+    medium: "bg-amber-100 text-amber-700",
+    low: "bg-red-100 text-red-700"
+  };
+
+  if (loading) return <p className="mt-2 text-xs text-slate-400 animate-pulse">Loading prediction…</p>;
+  if (!pred || pred.error) {
+    return (
+      <p className="mt-2 text-xs text-slate-400 italic">
+        {pred?.error === 'insufficient data' ? 'Not enough history yet' : 'Prediction unavailable'}
+      </p>
+    );
+  }
+  if (pred.note) return <p className="mt-2 text-xs text-slate-400 italic">Fill rate flat — no prediction</p>;
+
+  return (
+    <div className="mt-2 flex items-center gap-2">
+      <TrendingUp size={13} className="text-slate-500 shrink-0" />
+      <span className="text-xs text-slate-600">Full in ~<strong>{pred.hoursUntilFull}h</strong></span>
+      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${confidenceColors[pred.confidence] || 'bg-slate-100 text-slate-600'}`}>
+        {pred.confidence}
+      </span>
+    </div>
+  );
+}
 
 const createMarkerIcon = (fillPercentage) => {
   let color;
@@ -258,14 +301,15 @@ export default function Bins() {
             <div className="flex-1 overflow-y-auto">
               <div className="space-y-2 p-4">
                 {filteredBins.length > 0 ? filteredBins.map((bin) => (
-                  <div key={bin.id} className={`rounded p-3 ${getFillColor(bin.fillPercentage)}`}>
+                  <div key={bin.id} className={`rounded p-3 cursor-pointer ${getFillColor(bin.fillPercentage)} ${selectedBin?.id === bin.id ? 'ring-2 ring-offset-1 ring-emerald-500' : ''}`}
+                    onClick={() => setSelectedBin(bin)}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="font-semibold text-slate-900">{bin.id}</p>
                         <p className="text-xs text-slate-600">{bin.area}</p>
                       </div>
                       <button
-                        onClick={() => setSelectedBin(bin)}
+                        onClick={(e) => { e.stopPropagation(); setSelectedBin(bin); }}
                         title="Schedule Pickup"
                         className="ml-2 rounded-full p-1 text-slate-400 hover:bg-white hover:text-emerald-700"
                       >
@@ -281,6 +325,7 @@ export default function Bins() {
                         <div className={`h-full transition-all ${bin.fillPercentage >= 80 ? "bg-red-500" : bin.fillPercentage >= 50 ? "bg-yellow-500" : "bg-emerald-500"}`} style={{ width: `${bin.fillPercentage}%` }} />
                       </div>
                       <p className="text-xs text-slate-500">{bin.lastCollected}</p>
+                      <PredictionPanel binId={bin.id} />
                     </div>
                   </div>
                 )) : (

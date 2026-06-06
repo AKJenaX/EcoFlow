@@ -34,3 +34,54 @@ body {
 .fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
+
+/* ── Mobile responsive fixes ─────────────────────────────────────────────── */
+
+/* Prevent horizontal scroll on mobile */
+body {
+  overflow-x: hidden;
+}
+
+/* Map: fixed height on small screens so it doesn't collapse or overflow */
+@media (max-width: 768px) {
+  .leaflet-container {
+    height: 400px !important;
+    width: 100% !important;
+  }
+
+  /* Recharts charts: ensure they don't overflow their containers */
+  .recharts-wrapper,
+  .recharts-responsive-container {
+    max-width: 100% !important;
+    overflow: hidden;
+  }
+
+  /* Tables: horizontal scroll on small viewports */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Sidebar: ensure it's above everything on mobile */
+  aside {
+    z-index: 40;
+  }
+
+  /* Main content: prevent layout bleed */
+  main {
+    overflow-x: hidden;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Stat cards: single column on very small screens */
+  .grid.sm\:grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet — 2 col stat grid */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .grid.lg\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

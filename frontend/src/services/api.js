@@ -36,6 +36,7 @@ export const updateVehicle = (id, data) => request(`/vehicle/update/${id}`, { me
 export const deleteVehicle = (id) => request(`/vehicle/delete/${id}`, { method: "DELETE" });
 
 export const getBins = () => request("/bin");
+export const getBinPrediction = (id) => request(`/bin/${id}/prediction`);
 export const addBin = (data) => request("/bin/add", { method: "POST", body: JSON.stringify(data) });
 export const updateBin = (id, data) => request(`/bin/update/${id}`, { method: "PUT", body: JSON.stringify(data) });
 export const deleteBin = (id) => request(`/bin/delete/${id}`, { method: "DELETE" });

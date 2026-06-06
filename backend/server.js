@@ -8,6 +8,7 @@ import { requestContext } from './middleware/requestContext.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { registerRulesEngine } from './services/rulesEngine.js';
 import { attachWebSocketServer } from './services/wsServer.js';
+import * as sensorSimulator from './services/sensorSimulator.js';
 
 import authorityRoutes from './authority.js';
 import vehicleRoutes from './vehicle.js';
@@ -83,5 +84,8 @@ connectDB().then(() => {
   // Use http.createServer so we can attach the WebSocket server to the same port
   const httpServer = http.createServer(app);
   attachWebSocketServer(httpServer);
-  httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    sensorSimulator.start();
+  });
 });
