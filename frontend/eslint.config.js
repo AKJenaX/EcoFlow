@@ -27,6 +27,9 @@ export default [
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         alert: 'readonly',
+        confirm: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly',
         WebSocket: 'readonly',
         Response: 'readonly',
         Request: 'readonly',
@@ -43,7 +46,10 @@ export default [
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-console': 'off',
       'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off'
+      'react/react-in-jsx-scope': 'off',
+      'react/no-unescaped-entities': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn'
     }
   }
 ];
