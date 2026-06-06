@@ -278,53 +278,7 @@ docker-compose up --build
 > docker-compose exec backend npm run seed:rbac
 > ```
 
-## Deployment (Railway)
-
-The fastest way to deploy EcoFlow to a live URL is via [Railway](https://railway.app).
-
-### One-command deploy
-
-```bash
-npm install -g @railway/cli   # install Railway CLI once
-railway login                  # authenticate (browser opens)
-railway link                   # link to your Railway project
-railway up                     # deploy all services
-```
-
-### Setup steps
-
-1. **Provision MySQL** — in the Railway dashboard, add a **MySQL plugin** to your project. Railway will inject `MYSQL_URL` automatically; map it in your service env as `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`.
-
-2. **Create two services** in Railway pointing to this repo:
-   - `backend` — root dir `./backend`, uses `backend/railway.json`
-   - `frontend` — root dir `./frontend`, uses `frontend/railway.json`
-
-3. **Set these environment variables** in the Railway dashboard for the `backend` service (copy from `.env.example`):
-
-| Variable | Description |
-|---|---|
-| `DB_HOST` | Railway MySQL internal hostname |
-| `DB_PORT` | `3306` |
-| `DB_USER` | Railway MySQL user |
-| `DB_PASS` | Railway MySQL password |
-| `DB_NAME` | Railway MySQL database name |
-| `JWT_SECRET` | Long random string — generate with `openssl rand -base64 32` |
-| `ALLOW_DEV_AUTH_BYPASS` | `false` in production |
-| `ENABLE_IOT` | `true` |
-| `SIMULATE_SENSORS` | `false` in production |
-| `PORT` | `3000` |
-
-4. **Set for the `frontend` service:**
-
-| Variable | Description |
-|---|---|
-| `VITE_API_URL` | The Railway public URL of your backend service (e.g. `https://ecoflow-backend.up.railway.app`) |
-
-5. **Run migrations** via Railway shell after first deploy:
-   ```bash
-   railway run --service backend npm run migrate
-   railway run --service backend npm run seed:rbac
-   ```
+## Deployment — coming soon
 
 ## Contributing
 
