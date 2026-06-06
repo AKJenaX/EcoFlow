@@ -1,10 +1,11 @@
 import js from '@eslint/js';
 
 export default [
+  // Global ignores — must be a standalone config object with no other keys
+  { ignores: ['node_modules/**', 'scripts/**'] },
   js.configs.recommended,
   {
     files: ['**/*.js'],
-    ignores: ['node_modules/**', 'scripts/**'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
