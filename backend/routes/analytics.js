@@ -136,84 +136,12 @@ router.get(
         SUM(CASE WHEN status IN ('resolved','closed') THEN 1 ELSE 0 END) AS resolved_incidents
       FROM incidents`
     );
-
     const [[telemetryStats]] = await executeQuery(
       `SELECT
         COUNT(*) AS telemetry_events,
         AVG(fill_pct) AS avg_fill_pct
       FROM telemetry_events`
     );
-
-    res.json({ incidentStats, telemetryStats });
-  })
-);
-
-router.get(
-  '/zone-scorecard',
-  requireAuth,
-  requirePermission('analytics.read'),
-  asyncHandler(async (_req, res) => {
-    const [rows] = await executeQuery(
-      `SELECT zone_name,
-              AVG(sla_adherence_pct) AS avg_sla_adherence_pct,
-              AVG(fleet_utilization_pct) AS avg_fleet_utilization_pct,
-              AVG(missed_pickup_recurrence_pct) AS avg_missed_pickup_recurrence_pct
-       FROM kpi_snapshots
-       GROUP BY zone_name`
-    );
-    res.json(rows);
-  })
-);
-
-router.post(
-  '/kpi/snapshot',
-  requireAuth,
-  requirePermission('analytics.write'),
-  asyncHandler(async (req, res) => {
-    const {
-      period_date,
-      zone_name,
-      overflow_reduction_pct,
-      sla_adherence_pct,
-      fuel_cost_per_ton,
-      avg_complaint_response_minutes,
-      fleet_utilization_pct,
-      missed_pickup_recurrence_pct
-    } = req.body || {};
-
-    const [result] = await executeQuery(
-      `INSERT INTO kpi_snapshots
-      (period_date, zone_name, overflow_reduction_pct, sla_adherence_pct, fuel_cost_per_ton,
-       avg_complaint_response_minutes, fleet_utilization_pct, missed_pickup_recurrence_pct)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        period_date,
-        zone_name || null,
-        overflow_reduction_pct ?? null,
-        sla_adherence_pct ?? null,
-        fuel_cost_per_ton ?? null,
-        avg_complaint_response_minutes ?? null,
-        fleet_utilization_pct ?? null,
-        missed_pickup_recurrence_pct ?? null
-      ]
-  requireAuth,
-  requirePermission('analytics.read'),
-  asyncHandler(async (_req, res) => {
-    const [[incidentStats]] = await executeQuery(
-      `SELECT
-        COUNT(*) AS total_incidents,
-        SUM(CASE WHEN severity = 'critical' THEN 1 ELSE 0 END) AS critical_incidents,
-        SUM(CASE WHEN status IN ('resolved','closed') THEN 1 ELSE 0 END) AS resolved_incidents
-      FROM incidents`
-    );
-
-    const [[telemetryStats]] = await executeQuery(
-      `SELECT
-        COUNT(*) AS telemetry_events,
-        AVG(fill_pct) AS avg_fill_pct
-      FROM telemetry_events`
-    );
-
     res.json({ incidentStats, telemetryStats });
   })
 );
