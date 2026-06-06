@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Create non-root user
 RUN addgroup -S ecoflow && adduser -S ecoflow -G ecoflow
