@@ -22,6 +22,32 @@ function randomDelta() {
   return sign * (2 + Math.random() * 6);
 }
 
+const locationCoordinates = {
+  'Koramangala': { lat: 12.9352, lng: 77.6245 },
+  'Market Road': { lat: 12.9716, lng: 77.5946 },
+  'Indiranagar': { lat: 13.0011, lng: 77.6394 },
+  'Whitefield': { lat: 12.9698, lng: 77.7499 },
+  'Central Depot': { lat: 12.9789, lng: 77.5905 },
+  'West Substation 2': { lat: 12.9469, lng: 77.6138 },
+  'Maintenance Dept': { lat: 13.0285, lng: 77.6706 },
+  'Inspection Unit 1': { lat: 13.0051, lng: 77.5507 },
+  'Inspection Unit 2': { lat: 12.9141, lng: 77.6102 },
+  'South Zone': { lat: 12.9226, lng: 77.5861 },
+  'Central Logistics': { lat: 12.9592, lng: 77.6433 }
+};
+
+function getCoordinatesForLocation(location, binId) {
+  if (location && locationCoordinates[location]) {
+    return locationCoordinates[location];
+  }
+  const latOffset = ((binId * 17) % 100) / 1000 - 0.05;
+  const lngOffset = ((binId * 31) % 100) / 1000 - 0.05;
+  return {
+    lat: 12.9716 + latOffset,
+    lng: 77.5946 + lngOffset
+  };
+}
+
 async function tick() {
   try {
     // Fetch all bins with their current fill level from latest telemetry
@@ -43,20 +69,22 @@ async function tick() {
       const newFill = Math.min(100, Math.max(0, currentFill + randomDelta()));
       const roundedFill = Math.round(newFill * 10) / 10;
 
-      // Insert new telemetry event
+      const coords = getCoordinatesForLocation(bin.area, bin.id);
+
+      // Insert new telemetry event with correct coordinates
       const [result] = await executeQuery(
         `INSERT INTO telemetry_events
            (bin_id, fill_pct, smoke_detected, tilt_detected, battery_pct, gps_lat, gps_lng, source_device)
          VALUES (?, ?, false, false, ?, ?, ?, 'simulator')`,
-        [bin.id, roundedFill, bin.battery_pct, bin.gps_lat, bin.gps_lng]
+        [bin.id, roundedFill, bin.battery_pct, coords.lat, coords.lng]
       );
 
       const binPayload = {
         Bin_ID: bin.id,
         fill_pct: roundedFill,
         area: bin.area,
-        gps_lat: bin.gps_lat,
-        gps_lng: bin.gps_lng,
+        gps_lat: coords.lat,
+        gps_lng: coords.lng,
         telemetry_id: result.insertId,
         simulated: true
       };

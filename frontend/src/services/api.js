@@ -42,7 +42,7 @@ export const updateBin = (id, data) => request(`/bin/update/${id}`, { method: "P
 export const deleteBin = (id) => request(`/bin/delete/${id}`, { method: "DELETE" });
 
 export const getIot = () => request("/iot");
-export const getAnalytics = () => request("/analytics");
+export const getAnalytics = () => request("/analytics/overview");
 export const getIncidents = () => request("/incidents");
 export const getAnomalies = () => request("/anomalies");
 export const getComplaints = () => request("/complaints");
@@ -53,10 +53,23 @@ export const login = (username, password) =>
     body: JSON.stringify({ username, password }),
   });
 
-export const register = (username, password) =>
+export const generateMfaSecret = (tempToken) =>
+  request("/auth/mfa/generate", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${tempToken}` }
+  });
+
+export const verifyMfaCode = (tempToken, code) =>
+  request("/auth/mfa/verify", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${tempToken}` },
+    body: JSON.stringify({ code })
+  });
+
+export const register = (username, password, accessCode) =>
   request("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, accessCode }),
   });
 
 // ── Pickup Requests ──────────────────────────────────────────────────────────

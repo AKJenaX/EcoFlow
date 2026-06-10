@@ -138,7 +138,7 @@ router.get(
     );
     const [[telemetryStats]] = await executeQuery(
       `SELECT
-        COUNT(*) AS telemetry_events,
+        COUNT(DISTINCT bin_id) AS total_bins,
         AVG(fill_pct) AS avg_fill_pct
       FROM telemetry_events`
     );

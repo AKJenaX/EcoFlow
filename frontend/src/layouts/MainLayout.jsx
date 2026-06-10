@@ -1,21 +1,69 @@
-import { useState } from "react";
-import { Bell, Menu, X, LogOut } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { 
+  LayoutDashboard, 
+  Trash2, 
+  Route, 
+  Truck, 
+  Map, 
+  BarChart3, 
+  ShieldAlert, 
+  Bell, 
+  Menu, 
+  X, 
+  LogOut,
+  AlertTriangle,
+  Info
+} from "lucide-react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { getIncidents } from "../services/api.js";
 
 const navItems = [
-  { label: "Dashboard", to: "/dashboard" },
-  { label: "Bins", to: "/bins" },
-  { label: "Routes", to: "/routes" },
-  { label: "Fleet", to: "/fleet" },
-  { label: "Map", to: "/map" },
-  { label: "Reports", to: "/reports" },
-  { label: "Authority", to: "/authority" }
+  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
+  { label: "Bins", to: "/bins", icon: Trash2 },
+  { label: "Routes", to: "/routes", icon: Route },
+  { label: "Fleet", to: "/fleet", icon: Truck },
+  { label: "Map", to: "/map", icon: Map },
+  { label: "Reports", to: "/reports", icon: BarChart3 },
+  { label: "Authority", to: "/authority", icon: ShieldAlert }
 ];
 
 export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const dropdownRef = useRef(null);
+  
   const location = useLocation();
   const navigate = useNavigate();
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await getIncidents();
+      const list = Array.isArray(data) ? data : data.data || [];
+      setNotifications(list.slice(0, 5));
+      const activeCount = list.filter(inc => inc.status === 'open' || inc.status === 'assigned' || inc.status === 'in_progress').length;
+      setUnreadCount(activeCount);
+    } catch (err) {
+      console.warn("Failed to fetch layout notifications:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 20000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -34,42 +82,46 @@ export default function MainLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-20 w-64 bg-[#1a3a2a] px-5 py-6 text-white transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-20 w-64 bg-gradient-to-b from-[#163022] to-[#1a3a2a] px-5 py-6 text-white transition-transform duration-300 md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        } flex flex-col`}
+        } flex flex-col shadow-xl`}
       >
-        <div className="mb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200">
+        <div className="mb-10 px-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#84cc16]">
             EcoFlow
           </p>
-          <h1 className="mt-2 text-xl font-semibold">Operations</h1>
+          <h1 className="mt-2 text-xl font-bold tracking-tight text-white">Operations</h1>
         </div>
 
-        <nav className="space-y-2 flex-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                [
-                  "block rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-[#84cc16] text-[#1a3a2a] font-semibold shadow-md"
-                    : "text-emerald-50 hover:bg-white/10"
-                ].join(" ")
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+        <nav className="space-y-1.5 flex-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  [
+                    "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 transform",
+                    isActive
+                      ? "bg-[#84cc16] text-[#1a3a2a] font-semibold shadow-lg translate-x-1"
+                      : "text-emerald-100/90 hover:bg-white/10 hover:text-white hover:translate-x-1"
+                  ].join(" ")
+                }
+              >
+                <Icon size={18} className="shrink-0" />
+                {item.label}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-emerald-50 hover:bg-white/10 transition-all duration-200"
+          className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-emerald-100/90 hover:bg-white/10 hover:text-white hover:translate-x-1 transition-all duration-200 transform"
         >
-          <LogOut size={18} />
+          <LogOut size={18} className="shrink-0" />
           Logout
         </button>
       </aside>
@@ -88,13 +140,76 @@ export default function MainLayout() {
             )}
           </button>
           <h2 className="text-lg font-semibold flex-1 md:flex-none md:ml-0 ml-4">EcoFlow</h2>
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100"
-          >
-            <Bell size={20} />
-          </button>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              aria-label="Notifications"
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                if (!showNotifications) fetchNotifications();
+              }}
+              className="relative grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition duration-150 active:scale-95"
+            >
+              <Bell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-extrabold text-white animate-bounce shadow-md">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 z-50 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl animate-fade-in origin-top-right transform scale-100 transition-all">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+                  <h3 className="text-sm font-bold text-slate-900">Operations Alerts</h3>
+                  <span className="text-[10px] bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 font-bold uppercase tracking-wider">
+                    {unreadCount} Active
+                  </span>
+                </div>
+
+                <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                  {notifications.length > 0 ? (
+                    notifications.map((notif) => {
+                      const isCritical = notif.severity === "critical" || notif.severity === "high";
+                      const isOpen = notif.status === "open";
+                      return (
+                        <div
+                          key={notif.id}
+                          className={`flex items-start gap-2.5 rounded-lg p-2 transition ${
+                            isOpen ? "bg-slate-50 border-l-2 border-emerald-500" : "bg-white"
+                          }`}
+                        >
+                          <div className={`mt-0.5 shrink-0 rounded-full p-1 ${isCritical ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-500'}`}>
+                            {isCritical ? <AlertTriangle size={14} /> : <Info size={14} />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1.5">
+                              <p className="text-xs font-bold text-slate-800 truncate uppercase tracking-wider">
+                                {notif.incident_type.replace('_', ' ')}
+                              </p>
+                              <span className={`text-[9px] font-bold rounded-full px-1.5 py-0.2 border capitalize ${
+                                isCritical ? 'bg-red-50 text-red-650 border-red-200' : 'bg-amber-50 text-amber-650 border-amber-200'
+                              }`}>
+                                {notif.severity}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 font-semibold mt-0.5 line-clamp-2">
+                              {notif.description || `Bin ${notif.bin_id || '??'} requires attention.`}
+                            </p>
+                            <p className="text-[9px] text-slate-400 mt-1 font-medium">
+                              {new Date(notif.opened_at || notif.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className="text-center text-xs text-slate-400 font-medium py-6">No operational alerts.</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </header>
 
         <main className="p-6 md:p-8 fade-in">

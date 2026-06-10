@@ -7,7 +7,19 @@ import { predictFillLevel } from './services/fillPredictor.js';
 const router = express.Router();
 
 router.get('/', asyncHandler(async (req, res) => {
-  const [rows] = await db.execute('SELECT * FROM Bin');
+  const [rows] = await db.execute(`
+    SELECT b.*, 
+           t.gps_lat, 
+           t.gps_lng, 
+           t.fill_pct
+    FROM Bin b
+    LEFT JOIN telemetry_events t ON t.bin_id = b.Bin_ID
+      AND t.id = (
+        SELECT MAX(id) 
+        FROM telemetry_events 
+        WHERE bin_id = b.Bin_ID
+      )
+  `);
   res.json(rows);
 }));
 
