@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "migrate": "node scripts/migrate.js",
     "seed:rbac": "node scripts/seed-rbac.js",
+    "seed:data": "node scripts/seed-data.js",
     "test": "node --test"
   },
   "dependencies": {
