@@ -30,7 +30,7 @@ const ProgressBar = ({ load }) => (
 
 function mergeDriverVehicle(drivers, vehicles) {
   return drivers.map((d) => {
-    const v = vehicles.find((v) => v._id === d.Vehicle_ID || v.id === d.Vehicle_ID) || {};
+    const v = vehicles.find((v) => v.Vehicle_ID === d.Vehicle_ID) || {};
     return {
       vehicleId: v.Vehicle_Number || d.Vehicle_ID || "-",
       driver: d.Name || "-",

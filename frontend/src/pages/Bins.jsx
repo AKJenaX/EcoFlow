@@ -52,9 +52,9 @@ function PredictionPanel({ binId }) {
 
 const createMarkerIcon = (fillPercentage) => {
   let color;
-  if (fillPercentage >= 80) {
+  if (fillPercentage >= 90) {
     color = "red";
-  } else if (fillPercentage >= 50) {
+  } else if (fillPercentage >= 75) {
     color = "orange";
   } else {
     color = "green";
@@ -70,14 +70,14 @@ const createMarkerIcon = (fillPercentage) => {
 };
 
 const getFillColor = (fillPercentage) => {
-  if (fillPercentage >= 80) return "bg-red-50 border-l-4 border-red-500";
-  if (fillPercentage >= 50) return "bg-yellow-50 border-l-4 border-yellow-500";
+  if (fillPercentage >= 90) return "bg-red-50 border-l-4 border-red-500";
+  if (fillPercentage >= 75) return "bg-yellow-50 border-l-4 border-yellow-500";
   return "bg-emerald-50 border-l-4 border-emerald-500";
 };
 
 const getStatusColor = (fillPercentage) => {
-  if (fillPercentage >= 80) return "text-red-700 font-semibold";
-  if (fillPercentage >= 50) return "text-yellow-700 font-semibold";
+  if (fillPercentage >= 90) return "text-red-700 font-semibold";
+  if (fillPercentage >= 75) return "text-yellow-700 font-semibold";
   return "text-emerald-700 font-semibold";
 };
 
@@ -322,7 +322,7 @@ export default function Bins() {
                         <span className={getStatusColor(bin.fillPercentage)}>{bin.fillPercentage}%</span>
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
-                        <div className={`h-full transition-all ${bin.fillPercentage >= 80 ? "bg-red-500" : bin.fillPercentage >= 50 ? "bg-yellow-500" : "bg-emerald-500"}`} style={{ width: `${bin.fillPercentage}%` }} />
+                        <div className={`h-full transition-all ${bin.fillPercentage >= 90 ? "bg-red-500" : bin.fillPercentage >= 75 ? "bg-yellow-500" : "bg-emerald-500"}`} style={{ width: `${bin.fillPercentage}%` }} />
                       </div>
                       <p className="text-xs text-slate-500">{bin.lastCollected}</p>
                       <PredictionPanel binId={bin.id} />

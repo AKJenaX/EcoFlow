@@ -55,7 +55,7 @@ export default function Authority() {
       Control_Room: auth.Control_Room || "",
       Works_Under: auth.Works_Under || "",
     });
-    setEditingId(auth._id || auth.id);
+    setEditingId(auth.Authority_ID);
     setShowForm(true);
   };
 
@@ -156,7 +156,7 @@ export default function Authority() {
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {authorities.length > 0 ? authorities.map((auth) => (
-                  <tr key={auth._id || auth.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={auth.Authority_ID} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 font-semibold text-slate-900">{auth.Name}</td>
                     <td className="px-6 py-4 text-slate-700">{auth.Designation}</td>
                     <td className="px-6 py-4 text-slate-700">{auth.Control_Room}</td>
@@ -166,7 +166,7 @@ export default function Authority() {
                         <button onClick={() => handleEdit(auth)} className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors">
                           <Pencil size={16} />
                         </button>
-                        <button onClick={() => handleDelete(auth._id || auth.id)} className="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors">
+                        <button onClick={() => handleDelete(auth.Authority_ID)} className="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors">
                           <Trash2 size={16} />
                         </button>
                       </div>
