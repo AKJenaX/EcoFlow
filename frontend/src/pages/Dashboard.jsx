@@ -230,8 +230,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">Overview</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Overview</p>
+        <h1 className="mt-1 text-3xl font-bold text-[#1a3a2a] tracking-tight">Dashboard</h1>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

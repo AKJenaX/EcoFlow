@@ -44,8 +44,8 @@ export default function RoutesPage() {
       {/* Header with Add Route Button */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-600">Operations</p>
-          <h1 className="mt-1 text-3xl font-bold text-[#1a3a2a]">Collection Routes</h1>
+          <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Operations</p>
+          <h1 className="mt-1 text-3xl font-bold text-[#1a3a2a] tracking-tight">Collection Routes</h1>
         </div>
         <button className="flex items-center gap-2 rounded-xl bg-[#84cc16] px-4 py-2 text-sm font-bold text-[#1a3a2a] shadow-md transition-all hover:shadow-lg hover:bg-[#72b012] hover:-translate-y-0.5 active:translate-y-0 duration-200 transform">
           <Plus className="h-5 w-5" />

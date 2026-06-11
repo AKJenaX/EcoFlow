@@ -454,8 +454,8 @@ export default function Bins() {
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">Network</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Bins</h1>
+          <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Network</p>
+          <h1 className="mt-1 text-3xl font-bold text-[#1a3a2a] tracking-tight">Bins</h1>
         </div>
         <button
           onClick={() => setShowAddBin(true)}

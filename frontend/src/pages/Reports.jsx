@@ -70,10 +70,10 @@ export default function Reports() {
     <div className="space-y-6">
       {/* Header */}
       <header>
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+        <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
           Analytics
         </p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight">Reports</h1>
+        <h1 className="mt-1 text-3xl font-bold text-[#1a3a2a] tracking-tight">Reports</h1>
       </header>
 
       {/* Date Range Selector */}
