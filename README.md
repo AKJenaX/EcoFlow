@@ -278,7 +278,19 @@ docker-compose up --build
 > docker-compose exec backend npm run seed:rbac
 > ```
 
-## Deployment — coming soon
+## Deployment
+
+The platform is deployed using a completely free-tier cloud architecture:
+- 💻 **Frontend**: Hosted on **Vercel** — [eco-flow-neon.vercel.app](https://eco-flow-neon.vercel.app)
+- ⚙️ **Backend**: Hosted on **Hugging Face Spaces** (Docker environment with WebSockets)
+- 🗄️ **Database**: Hosted on **TiDB Cloud Serverless** (MySQL-compatible cloud database)
+
+## Team Members
+
+This project was built as a collaborative team effort:
+- **Anup Kumar Jena** ([@AKJenaX](https://github.com/AKJenaX))
+- **Irfan** ([@Irfan052](https://github.com/Irfan052))
+- **Ravi Sharma** ([@ravisharma62663](https://github.com/ravisharma62663))
 
 ## Contributing
 
