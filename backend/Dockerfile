@@ -1,6 +1,7 @@
 FROM node:20-alpine
 
 # Create non-root user
+RUN apk update && apk add --no-cache ca-certificates
 RUN addgroup -S ecoflow && adduser -S ecoflow -G ecoflow
 
 WORKDIR /app

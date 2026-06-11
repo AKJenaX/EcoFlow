@@ -26,7 +26,7 @@ export async function connectDB() {
     await pool.query('SELECT 1');
     console.log('✅ Connected to MySQL database');
   } catch (err) {
-    console.error('❌ Error connecting to MySQL:', err.message);
+    console.error('❌ Error connecting to MySQL:', err);
     process.exit(1);
   }
 }
