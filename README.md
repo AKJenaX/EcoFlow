@@ -6,15 +6,15 @@ A full-stack smart waste management platform with a React dashboard and Express 
 
 ## Features
 
-- 🔐 **Authentication** - JWT-based login with protected routes and role-based access control
-- 📊 **Interactive Dashboard** - Real-time KPI cards, charts, and live incident alerts from the API
-- 🗺️ **Smart Bin Mapping** - React Leaflet maps with color-coded bin markers and route polylines
-- 🚛 **Fleet Management** - Driver + vehicle data merged from the API with status tracking
-- 👮 **Authority Management** - Full CRUD for authority officers (add/edit/delete via API)
-- 📈 **Advanced Analytics** - Monthly trends, waste category breakdowns, and collection logs
-- 🛣️ **Route Management** - Collection routes with expandable bin-stop details
-- 📱 **Fully Responsive** - Mobile-first design with collapsible sidebar navigation
-- 🔄 **Offline Fallback** - Graceful mock data fallback when the API is unavailable
+- 🔐 **Secure Auth & MFA** - JWT-based login with role-based access control and forced Multi-Factor Authentication (speakeasy TOTP, QR code enrollment, and 6-digit auto-focus split inputs)
+- 📊 **Interactive Dashboard** - Real-time IoT status cards, live incident alerts, and a Sustainability & Environmental Impact Tracker (CO₂ reduction, recycled weight, landfill diversion radial progress)
+- 🗺️ **Smart Bin Mapping** - Color-coded map markers with dynamic fill percentage filters (Critical, Warning, Healthy) and sidebar search
+- 🚛 **Fleet Management** - Live vehicle and driver status tracking (Available, On Route, Under Maintenance)
+- 👮 **Authority Management** - Zonal management and full CRUD for authority officers and coordinators
+- 🛣️ **Dynamic Route Optimization** - Recalculate optimal routing stop sequences in real-time with threshold sliders (50%-90%) and OSRM road network polylines
+- 📈 **Advanced Analytics** - Recharts line and bar visualizations, including a 24-Hour waste accumulation predictive forecast
+- 👤 **Header Quick Profile** - Dynamically extracts logged-in credentials from JWT tokens to display user initials avatar badges in the top navbar
+- 📱 **Fully Responsive & Clean** - High-fidelity layout with global Inter typography, micro-animations, and hamburger menu navigation
 
 ## Tech Stack
 
@@ -28,9 +28,9 @@ A full-stack smart waste management platform with a React dashboard and Express 
 
 - **Framework**: React 19 with Hooks
 - **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **Charting**: Recharts
-- **Mapping**: React Leaflet + Leaflet
+- **Styling**: Tailwind CSS (with emerald operations theme highlights)
+- **Charting**: Recharts (with dashed predictive forecast paths)
+- **Mapping**: React Leaflet + Leaflet + OSRM road geometry
 - **Icons**: Lucide React
 - **Routing**: React Router 7
 
@@ -42,7 +42,7 @@ A full-stack smart waste management platform with a React dashboard and Express 
 
 - **Runtime**: Node.js with Express
 - **Database**: MySQL
-- **Auth**: JWT (Bearer tokens) with bcrypt password hashing
+- **Auth**: JWT (Bearer tokens) with bcrypt password hashing & Speakeasy TOTP MFA
 - **Security**: Helmet, CORS, rate limiting
 - **Architecture**: Role-based access control with audit logging
 
