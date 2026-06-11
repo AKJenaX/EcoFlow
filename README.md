@@ -289,8 +289,8 @@ The platform is deployed using a completely free-tier cloud architecture:
 
 This project was built as a collaborative team effort:
 - **Anup Kumar Jena** ([@AKJenaX](https://github.com/AKJenaX))
-- **Irfan** ([@Irfan052](https://github.com/Irfan052))
-- **Ravi Sharma** ([@ravisharma62663](https://github.com/ravisharma62663))
+- **Shaik Irfan** ([@Irfan052](https://github.com/Irfan052))
+- **Sharma Ravikumar Pannalal** ([@ravisharma62663](https://github.com/ravisharma62663))
 
 ## Contributing
 
