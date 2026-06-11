@@ -70,7 +70,7 @@ export default function Fleet() {
             underMaintenance: merged.filter((f) => f.status === "Under Maintenance").length
           });
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) setError("API unavailable — showing mock data.");
       } finally {
         if (!cancelled) setLoading(false);

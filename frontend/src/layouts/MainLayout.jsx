@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   Info
 } from "lucide-react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { getIncidents } from "../services/api.js";
 
 const navItems = [
@@ -33,8 +33,6 @@ export default function MainLayout() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
-  
-  const location = useLocation();
   const navigate = useNavigate();
 
   const fetchNotifications = async () => {
@@ -50,9 +48,20 @@ export default function MainLayout() {
   };
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 20000);
-    return () => clearInterval(interval);
+    let active = true;
+    const timer = setTimeout(() => {
+      if (active) fetchNotifications();
+    }, 0);
+
+    const interval = window.setInterval(() => {
+      if (active) fetchNotifications();
+    }, 20000);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      window.clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {

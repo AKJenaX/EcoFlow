@@ -17,7 +17,7 @@ export default function Authority() {
     try {
       const data = await getAuthorities();
       setAuthorities(Array.isArray(data) ? data : data.data || []);
-    } catch (err) {
+    } catch {
       setError("Failed to load authorities. Please check the API connection.");
       setAuthorities([]);
     } finally {
@@ -25,7 +25,12 @@ export default function Authority() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const resetForm = () => {
     setForm({ Name: "", Designation: "", Control_Room: "", Works_Under: "" });
@@ -43,7 +48,7 @@ export default function Authority() {
       }
       resetForm();
       fetchData();
-    } catch (err) {
+    } catch {
       setError("Failed to save. Please try again.");
     }
   };
@@ -64,7 +69,7 @@ export default function Authority() {
     try {
       await deleteAuthority(id);
       fetchData();
-    } catch (err) {
+    } catch {
       setError("Failed to delete. Please try again.");
     }
   };

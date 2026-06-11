@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login, generateMfaSecret, verifyMfaCode } from "../services/api.js";
 
@@ -13,15 +13,15 @@ export default function Login() {
   const [codeArray, setCodeArray] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const inputRefs = useRef([]);
 
-  // Reset split-digit array whenever step changes
-  useEffect(() => {
+  const changeStep = (newStep) => {
     setCodeArray(["", "", "", "", "", ""]);
     setMfaCode("");
-  }, [step]);
+    setStep(newStep);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,22 +31,22 @@ export default function Login() {
       const data = await login(username, password);
       if (data.status === "MFA_REQUIRED") {
         setMfaToken(data.mfaToken);
-        setStep("mfa_verify");
+        changeStep("mfa_verify");
       } else if (data.status === "MFA_SETUP_REQUIRED") {
         setMfaToken(data.mfaToken);
         try {
           const mfaSetup = await generateMfaSecret(data.mfaToken);
           setMfaQrCode(mfaSetup.qrCode);
           setMfaSecret(mfaSetup.secret || "");
-          setStep("mfa_setup");
-        } catch (setupErr) {
+          changeStep("mfa_setup");
+        } catch {
           setError("Failed to initialize MFA setup. Please contact support.");
         }
       } else {
         localStorage.setItem("accessToken", data.accessToken);
         navigate("/dashboard");
       }
-    } catch (err) {
+    } catch {
       setError("Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ export default function Login() {
       const data = await verifyMfaCode(mfaToken, mfaCode);
       localStorage.setItem("accessToken", data.accessToken);
       navigate("/dashboard");
-    } catch (err) {
+    } catch {
       setError("Invalid verification code. Please try again.");
     } finally {
       setLoading(false);
@@ -218,7 +218,7 @@ export default function Login() {
               <label htmlFor="mfaCode" className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Enter 6-digit verification code
               </label>
-              
+
               <div className="flex justify-between gap-2" onPaste={handlePaste}>
                 {codeArray.map((digit, idx) => (
                   <input
@@ -244,10 +244,10 @@ export default function Login() {
             >
               {loading ? "Verifying..." : "Verify & Log In"}
             </button>
-            
+
             <button
               type="button"
-              onClick={() => setStep("credentials")}
+              onClick={() => changeStep("credentials")}
               className="w-full text-center text-xs font-semibold text-slate-500 hover:text-[#1a3a2a] transition duration-200"
             >
               Back to Sign In
@@ -301,7 +301,7 @@ export default function Login() {
 
             <button
               type="button"
-              onClick={() => setStep("credentials")}
+              onClick={() => changeStep("credentials")}
               className="w-full text-center text-xs font-semibold text-slate-500 hover:text-[#1a3a2a] transition duration-200"
             >
               Back to Sign In

@@ -52,12 +52,6 @@ export default function Reports() {
   const handleExportPDF = () =>
     triggerDownload(`/analytics/export/pdf?range=all`, `ecoflow-analytics.pdf`);
 
-  const getStatusColor = (status) => {
-    if (status === "Completed") return "text-emerald-700 font-semibold";
-    if (status === "In Progress") return "text-blue-700 font-semibold";
-    return "text-slate-700";
-  };
-
   const getStatusBadge = (status) => {
     const badgeStyles = {
       Completed: "bg-emerald-100 text-emerald-800",

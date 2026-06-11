@@ -14,8 +14,6 @@ function PredictionPanel({ binId }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setPred(null);
     getBinPrediction(binId)
       .then((data) => { if (!cancelled) setPred(data); })
       .catch(() => { if (!cancelled) setPred({ error: 'unavailable' }); })
@@ -109,7 +107,7 @@ function SchedulePickupModal({ bin, onClose, onSuccess }) {
     try {
       await createPickupRequest({ binId: bin.id, scheduledDate: date, notes });
       onSuccess();
-    } catch (err) {
+    } catch {
       setError("Failed to schedule pickup. Please try again.");
     } finally {
       setSubmitting(false);
@@ -250,7 +248,7 @@ function AddBinModal({ onClose, onSuccess }) {
         Authority_ID: authorityId ? Number(authorityId) : null
       });
       onSuccess();
-    } catch (err) {
+    } catch {
       setError("Failed to add bin. Please check your role permissions.");
     } finally {
       setSubmitting(false);
@@ -415,7 +413,7 @@ export default function Bins() {
       if (list.length > 0) {
         setBins(list.map(mapApiBin));
       }
-    } catch (err) {
+    } catch {
       setError("API unavailable — showing mock data.");
     } finally {
       setLoading(false);
@@ -423,7 +421,10 @@ export default function Bins() {
   };
 
   useEffect(() => {
-    fetchBins();
+    const timer = setTimeout(() => {
+      fetchBins();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const filteredBins = bins.filter((bin) => {
@@ -569,7 +570,7 @@ export default function Bins() {
                         <div className={`h-full transition-all ${bin.fillPercentage >= 90 ? "bg-red-500" : bin.fillPercentage >= 75 ? "bg-yellow-500" : "bg-emerald-500"}`} style={{ width: `${bin.fillPercentage}%` }} />
                       </div>
                       <p className="text-[11px] text-slate-500">{bin.lastCollected}</p>
-                      <PredictionPanel binId={bin.id} />
+                      <PredictionPanel key={bin.id} binId={bin.id} />
                     </div>
                   </div>
                 )) : (

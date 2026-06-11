@@ -6,7 +6,7 @@ import {
 import { AlertCircle, TrendingUp, Zap, Trash2, Radio } from "lucide-react";
 import {
   weeklyCollectionData, wasteTypeData,
-  recentAlerts as mockAlerts, dashboardStats
+  recentAlerts as mockAlerts
 } from "../data/mockData.js";
 import { getIncidents, getPickupRequests, updatePickupRequest, getAnalytics, getBins } from "../services/api.js";
 import { onMessage } from "../services/socket.js";
@@ -95,7 +95,6 @@ export default function Dashboard() {
     avgFillLevel: "-",
     alertsToday: "-"
   });
-  const [statsLoading, setStatsLoading] = useState(true);
 
   // Fetch critical bins for dashboard mini-map
   useEffect(() => {
@@ -134,7 +133,7 @@ export default function Dashboard() {
         if (!cancelled && list.length > 0) {
           setAlerts(list.map(mapIncident));
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) setAlertsError("API unavailable — showing mock data.");
       } finally {
         if (!cancelled) setAlertsLoading(false);
@@ -167,8 +166,6 @@ export default function Dashboard() {
         }
       } catch (err) {
         console.error("Failed to fetch analytics stats:", err);
-      } finally {
-        if (!cancelled) setStatsLoading(false);
       }
     }
     fetchStats();
