@@ -8,7 +8,7 @@ dotenv.config();
 const router = express.Router();
 
 const apiKey = process.env.OPENAI_API_KEY;
-const openai = new OpenAI({ apiKey });
+const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
 router.post('/chat', requireAuth, requirePermission('copilot.read'), async (req, res) => {
   try {
