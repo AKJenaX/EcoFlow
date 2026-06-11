@@ -22,6 +22,7 @@ const dbConfig = {
 
 export async function connectDB() {
   try {
+    console.log(`🔌 Attempting database connection to ${dbConfig.host}:${dbConfig.port}...`);
     pool = mysql.createPool(dbConfig);
     await pool.query('SELECT 1');
     console.log('✅ Connected to MySQL database');
