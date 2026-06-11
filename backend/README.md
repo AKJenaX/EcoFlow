@@ -2,7 +2,7 @@
 title: ecoflow-backend
 emoji: ♻️
 colorFrom: green
-colorTo: emerald
+colorTo: green
 sdk: docker
 app_port: 3000
 ---
