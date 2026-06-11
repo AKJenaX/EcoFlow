@@ -34,6 +34,33 @@ export default function MainLayout() {
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const [username] = useState(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.username || "User";
+      } catch (err) {
+        console.error("Failed to parse token in layout:", err);
+      }
+    }
+    return "User";
+  });
+
+  const getInitials = (name) => {
+    if (!name) return "";
+    const cleanName = name.replace(/[0-9]/g, '');
+    const nameToUse = cleanName.trim() ? cleanName : name;
+    const parts = nameToUse.trim().split(/[\s_-]+/);
+    if (parts.length >= 2) {
+      const firstPart = parts[0][0] || '';
+      const secondPart = parts[1][0] || '';
+      return (firstPart + secondPart).toUpperCase();
+    }
+    return nameToUse.slice(0, 2).toUpperCase();
+  };
+
+  const initials = getInitials(username);
 
   const fetchNotifications = async () => {
     try {
@@ -149,75 +176,87 @@ export default function MainLayout() {
             )}
           </button>
           <h2 className="text-lg font-semibold flex-1 md:flex-none md:ml-0 ml-4">EcoFlow</h2>
-          <div className="relative" ref={dropdownRef}>
-            <button
-              type="button"
-              aria-label="Notifications"
-              onClick={() => {
-                setShowNotifications(!showNotifications);
-                if (!showNotifications) fetchNotifications();
-              }}
-              className="relative grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition duration-150 active:scale-95"
-            >
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-extrabold text-white animate-bounce shadow-md">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 z-50 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl animate-fade-in origin-top-right transform scale-100 transition-all">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
-                  <h3 className="text-sm font-bold text-slate-900">Operations Alerts</h3>
-                  <span className="text-[10px] bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 font-bold uppercase tracking-wider">
-                    {unreadCount} Active
+          
+          <div className="flex items-center gap-3">
+            {/* Notifications */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                aria-label="Notifications"
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  if (!showNotifications) fetchNotifications();
+                }}
+                className="relative grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition duration-150 active:scale-95"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-extrabold text-white animate-bounce shadow-md">
+                    {unreadCount}
                   </span>
-                </div>
+                )}
+              </button>
 
-                <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                  {notifications.length > 0 ? (
-                    notifications.map((notif) => {
-                      const isCritical = notif.severity === "critical" || notif.severity === "high";
-                      const isOpen = notif.status === "open";
-                      return (
-                        <div
-                          key={notif.id}
-                          className={`flex items-start gap-2.5 rounded-lg p-2 transition ${
-                            isOpen ? "bg-slate-50 border-l-2 border-emerald-500" : "bg-white"
-                          }`}
-                        >
-                          <div className={`mt-0.5 shrink-0 rounded-full p-1 ${isCritical ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-500'}`}>
-                            {isCritical ? <AlertTriangle size={14} /> : <Info size={14} />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1.5">
-                              <p className="text-xs font-bold text-slate-800 truncate uppercase tracking-wider">
-                                {notif.incident_type.replace('_', ' ')}
-                              </p>
-                              <span className={`text-[9px] font-bold rounded-full px-1.5 py-0.2 border capitalize ${
-                                isCritical ? 'bg-red-50 text-red-650 border-red-200' : 'bg-amber-50 text-amber-650 border-amber-200'
-                              }`}>
-                                {notif.severity}
-                              </span>
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 z-50 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl animate-fade-in origin-top-right transform scale-100 transition-all">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+                    <h3 className="text-sm font-bold text-slate-900">Operations Alerts</h3>
+                    <span className="text-[10px] bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 font-bold uppercase tracking-wider">
+                      {unreadCount} Active
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                    {notifications.length > 0 ? (
+                      notifications.map((notif) => {
+                        const isCritical = notif.severity === "critical" || notif.severity === "high";
+                        const isOpen = notif.status === "open";
+                        return (
+                          <div
+                            key={notif.id}
+                            className={`flex items-start gap-2.5 rounded-lg p-2 transition ${
+                              isOpen ? "bg-slate-50 border-l-2 border-emerald-500" : "bg-white"
+                            }`}
+                          >
+                            <div className={`mt-0.5 shrink-0 rounded-full p-1 ${isCritical ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-500'}`}>
+                              {isCritical ? <AlertTriangle size={14} /> : <Info size={14} />}
                             </div>
-                            <p className="text-[11px] text-slate-600 font-semibold mt-0.5 line-clamp-2">
-                              {notif.description || `Bin ${notif.bin_id || '??'} requires attention.`}
-                            </p>
-                            <p className="text-[9px] text-slate-400 mt-1 font-medium">
-                              {new Date(notif.opened_at || notif.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-1.5">
+                                <p className="text-xs font-bold text-slate-800 truncate uppercase tracking-wider">
+                                  {notif.incident_type.replace('_', ' ')}
+                                </p>
+                                <span className={`text-[9px] font-bold rounded-full px-1.5 py-0.2 border capitalize ${
+                                  isCritical ? 'bg-red-50 text-red-650 border-red-200' : 'bg-amber-50 text-amber-650 border-amber-200'
+                                }`}>
+                                  {notif.severity}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-600 font-semibold mt-0.5 line-clamp-2">
+                                {notif.description || `Bin ${notif.bin_id || '??'} requires attention.`}
+                              </p>
+                              <p className="text-[9px] text-slate-400 mt-1 font-medium">
+                                {new Date(notif.opened_at || notif.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-center text-xs text-slate-400 font-medium py-6">No operational alerts.</p>
-                  )}
+                        );
+                      })
+                    ) : (
+                      <p className="text-center text-xs text-slate-400 font-medium py-6">No operational alerts.</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* User Initials Avatar */}
+            <div 
+              title={username}
+              className="flex size-10 items-center justify-center rounded-full bg-emerald-700 text-white font-extrabold text-xs shadow-inner border border-emerald-850/20 select-none cursor-pointer hover:bg-emerald-800 transition duration-150 active:scale-95"
+            >
+              {initials}
+            </div>
           </div>
         </header>
 
