@@ -306,11 +306,15 @@ MIT License — See LICENSE file for details
 
 ## Screenshots
 
-<!-- Screenshot coming soon: Dashboard overview showing KPI cards, weekly collection chart, waste type breakdown, and live incidents table -->
+### Operations Dashboard & Sustainability Tracker
+![Dashboard Overview](screenshots/dashboard.png)
 
-<!-- Screenshot coming soon: Bins map page showing interactive Leaflet map with color-coded bin markers across Bengaluru and filterable sidebar -->
+### Interactive Bins Map & Capacity Filters
+![Smart Bins Map](screenshots/bins.png)
 
-<!-- Screenshot coming soon: Reports page showing monthly collection analytics, waste category pie chart, and CSV export table -->
+### Predictive Waste Accumulation & Analytics Reports
+![Analytics Reports](screenshots/reports.png)
+
 
 ---
 
